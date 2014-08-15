@@ -113,6 +113,7 @@ Makefile.local:
   DEBUG_CFLAGS       - C compiler flags to use for building debug version
   COPYDIR            - the target installation directory
   TEMPDIR            - specify user defined directory for temp files
+  PK3DIR             - the directory where pk3 files are located
 ```
 
 The defaults for these variables differ depending on the target platform.

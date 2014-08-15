@@ -1,6 +1,26 @@
 #!/bin/bash
 #
 
+function copyPK3Files {
+	if [[ ! -d $PK3DIR ]]; then
+		echo "No such directory $PK3DIR for flag 'PK3DIR' in Makefile.local"
+		exit
+	else
+
+		echo "Create symlink for pk3 files from $PK3DIR in $DESTDIR/$BASEGAME"
+
+		# If PK3DIR ends with `\` remove the last character
+		if [[ $PK3DIR == *\/ ]]; then
+			PK3DIR=${PK3DIR:0:(-1)}
+		fi
+
+		# Create the symlinks to pk3 files into compile destination path
+		IFS=$'\n'; for filename in $(ls $PK3DIR/*.pk3); do
+			ln -s $filename "$DESTDIR/$BASEGAME/$( basename $filename )"
+		done
+	fi
+}
+
 # Let's make the user give us a target build system
 
 if [ $# -ne 1 ]; then
@@ -75,3 +95,20 @@ NCPU=`sysctl -n hw.ncpu`
 
 # use the following shell script to build an application bundle
 "./make-macosx-app.sh" release ${BUILDARCH}
+
+BASEGAME="basetld"
+
+# Parse Makefile.local to find arguments used to copy the pk3 files
+while read line
+do
+	if [[ $line == BASEGAME=* ]]; then
+		BASEGAME=${line#BASEGAME=}
+	fi
+        if [[ $line == PK3DIR=* ]]; then
+	         PK3DIR=${line#PK3DIR=}
+	fi
+done <Makefile.local
+
+if [[ -n "$PK3DIR" ]]; then
+	copyPK3Files
+fi
